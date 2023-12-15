@@ -17,7 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+admin.site.site_header = 'Movie Database'
+admin.site.index_title = 'MDB Admin'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('watch/', include('watchlist_app.api.urls')),
+    path('api-auth/', include('rest_framework.urls')),
 ]

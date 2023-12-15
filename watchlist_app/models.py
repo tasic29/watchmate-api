@@ -1,4 +1,6 @@
+from email.policy import default
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
@@ -17,6 +19,8 @@ class WatchList(models.Model):
     platform = models.ForeignKey(
         StreamPlatform, on_delete=models.CASCADE, related_name='watchlist')
     active = models.BooleanField(default=True)
+    avg_rating = models.FloatField(default=0)
+    number_of_rating = models.IntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -24,6 +28,7 @@ class WatchList(models.Model):
 
 
 class Review(models.Model):
+    review_user = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)])
     description = models.CharField(max_length=200, null=True)
