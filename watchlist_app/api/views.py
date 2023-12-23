@@ -8,6 +8,8 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework import viewsets
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, ScopedRateThrottle
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 from watchlist_app.api.serializers import (StreamPlatformSerializer,
                                            WatchListSerializer,
@@ -15,6 +17,21 @@ from watchlist_app.api.serializers import (StreamPlatformSerializer,
 from watchlist_app.models import StreamPlatform, WatchList, Review
 from watchlist_app.api.permissions import IsAdminOrReadOnly, IsReviewUserOrReadOnly
 from watchlist_app.api.throttling import ReviewCreateThrottle, ReviewListThrottle
+
+
+class UserReview(generics.ListAPIView):
+    # queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    # permission_classes = [IsAuthenticated]
+    # throttle_classes = [ReviewListThrottle]
+
+    # def get_queryset(self):
+    #     username = self.kwargs['username']
+    #     return Review.objects.filter(review_user__username=username)
+
+    def get_queryset(self):
+        username = self.request.query_params.get('username')
+        return Review.objects.filter(review_user__username=username)
 
 
 class ReviewCreate(generics.CreateAPIView):
@@ -52,6 +69,8 @@ class ReviewList(generics.ListAPIView):
     serializer_class = ReviewSerializer
     # permission_classes = [IsAuthenticated]
     throttle_classes = [ReviewListThrottle]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['review_user__username', 'active']
 
     def get_queryset(self):
         pk = self.kwargs['pk']
@@ -65,6 +84,20 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     throttle_classes = [ScopedRateThrottle]
 
     throttle_scope = 'review-detail'
+
+
+class WatchListGV(generics.ListAPIView):
+    queryset = WatchList.objects.all()
+    serializer_class = WatchListSerializer(queryset, many=True)
+
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['title', 'platform__name']
+    search_fields = ['title', 'platform__name']
+    ordering_fields = ['avg_rating']
+
+    def get_queryset(self):
+        pk = self.kwargs['pk']
+        return Review.objects.filter(watchlist=pk)
 
 
 class WatchListAV(APIView):
