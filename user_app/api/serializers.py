@@ -22,7 +22,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         if password != password2:
             raise ValidationError({'error': 'P1 and P2 should be same!'})
 
-        if User.objects.filter(email=self.validated_data['email'].exists()):
+        if User.objects.filter(email=self.validated_data['email']).exists():
             raise serializers.ValidationError(
                 {'error': 'Email already exists!'})
 

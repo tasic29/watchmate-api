@@ -23,14 +23,16 @@ def registration_view(request):
         if serializer.is_valid():
             account = serializer.save()
 
-            data['response'] = 'Tegistration successful!'
+            data['response'] = 'The registration was successful!'
             data['username'] = account.username
             data['email'] = account.email
 
             token = Token.objects.get(user=account).key
             data['token'] = token
 
+            return Response(data, status=status.HTTP_201_CREATED)
         else:
-            data = [serializer.errors]
+            data = {'error': 'Registration failed.'}
+            data['details'] = serializer.errors
 
-            return Response(data)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
