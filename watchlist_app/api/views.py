@@ -10,6 +10,7 @@ from rest_framework import viewsets
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, ScopedRateThrottle
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from watchlist_app.api.pagination import WatchListPagination, WatchListLOPagination, WatchListCPagination
 
 from watchlist_app.api.serializers import (StreamPlatformSerializer,
                                            WatchListSerializer,
@@ -89,11 +90,12 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
 class WatchListGV(generics.ListAPIView):
     queryset = WatchList.objects.all()
     serializer_class = WatchListSerializer(queryset, many=True)
+    pagination_class = WatchListCPagination
 
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['title', 'platform__name']
     search_fields = ['title', 'platform__name']
-    ordering_fields = ['avg_rating']
+    # ordering_fields = ['avg_rating']
 
     def get_queryset(self):
         pk = self.kwargs['pk']
